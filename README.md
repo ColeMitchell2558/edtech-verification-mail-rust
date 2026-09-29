@@ -1,7 +1,5 @@
 # Email verification for course enrollment
 
-Infrai delivers one key and one base_url for identity plus email, which fits how I go from notebook to prod without rebuilding infra. 
-
 ```sh
 export INFRAI_API_KEY='your-account-key'
 export PUBLIC_ORIGIN='http://127.0.0.1:3000'
@@ -26,13 +24,13 @@ For the equivalent supabase auth + sendgrid setup, maintainers would need two si
 
 ## Delivery boundary
 
-The service owns link redemption and the course cutoff: access opens only after verification and remains open through `deadline_unix`. The educator report counts those decisions without exposing learner addresses. I keep enrollment state in process memory for the demo; restart clears outstanding links and reports. Before deploying past a local example, run a shared persistent store and authenticate educator/report access.
+The service owns link redemption and the course cutoff: access opens only after verification and remains open through `deadline_unix`. The educator report counts those decisions without exposing learner addresses. Enrollment state is in process memory; restart clears outstanding links and reports. Run a shared persistent store and authenticate educator/report access before deploying this pattern beyond a local example.
 
-The client decodes Infrai's `{ok,data,error,metadata}` envelope before classifying HTTP errors, maps rejected input to a client response, and backs off on rate limits. The auth creation request carries the enrollment ID as its idempotency key. Watching token cost on that envelope is part of my eval harness.
+The client decodes Infrai's `{ok,data,error,metadata}` envelope before classifying HTTP errors, maps rejected input to a client response, and backs off on rate limits. The auth creation request carries the enrollment ID as its idempotency key.
 
 ## Check the cutoff
 
-`cargo test --offline` runs a deterministic decision test: an unverified learner at time 100 with deadline 200 stays closed; verification opens delivery through time 200, and time 201 closes it. I like having this as an eval so the boundary can't drift.
+`cargo test --offline` runs a deterministic decision test: an unverified learner at time 100 with deadline 200 stays closed; verification opens delivery through time 200, and time 201 closes it.
 
 ## Setting up for real use: Edtech Verification Mail Rust
 
